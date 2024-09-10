@@ -3,19 +3,63 @@ import '../models/verse.dart';
 
 class SurahDetailScreen extends StatelessWidget {
   final List<Verse> verses;
+  final int currentSurahNo;
+  final void Function(int surahNo) onNavigateToSurah;
+  final VoidCallback onHomePressed; // Callback to handle home navigation
 
-  SurahDetailScreen({required this.verses});
+  SurahDetailScreen({
+    required this.verses,
+    required this.currentSurahNo,
+    required this.onNavigateToSurah,
+    required this.onHomePressed, // Initialize the home callback
+  });
 
   @override
   Widget build(BuildContext context) {
     // Combine all verses into a single string with line breaks
     final String combinedVerses = verses.map((verse) {
       return ' ${verse.ayaTextEmlaey} ${verse.ayaNo}';
-    }).join('');
+    }).join('\n');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Surah ${verses[0].suraNameAr}'),
+        automaticallyImplyLeading:
+            false, // Do not automatically imply a leading button
+        title: Row(
+          children: [
+            // Home button
+            IconButton(
+              icon: Icon(Icons.home),
+              onPressed: () {
+                onHomePressed(); // Navigate to the first screen
+              },
+            ),
+            // Surah name
+            Expanded(
+              child: Center(
+                child: Text('Surah ${verses[0].suraNameAr}'),
+              ),
+            ),
+            // Previous button
+            if (currentSurahNo > 1)
+              IconButton(
+                icon: Icon(Icons.arrow_back),
+                onPressed: () {
+                  _navigateToSurah(
+                      context, currentSurahNo - 1); // Go to previous Surah
+                },
+              ),
+            // Next button
+            if (currentSurahNo < 114)
+              IconButton(
+                icon: Icon(Icons.arrow_forward),
+                onPressed: () {
+                  _navigateToSurah(
+                      context, currentSurahNo + 1); // Go to next Surah
+                },
+              ),
+          ],
+        ),
         backgroundColor: Colors.green,
       ),
       body: Padding(
@@ -28,5 +72,12 @@ class SurahDetailScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void _navigateToSurah(BuildContext context, int surahNo) {
+    if (surahNo > 0 && surahNo <= 114) {
+      // Ensure the Surah number is valid
+      onNavigateToSurah(surahNo);
+    }
   }
 }
