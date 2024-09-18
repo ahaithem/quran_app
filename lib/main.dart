@@ -1,23 +1,19 @@
-// main.dart
-
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart'; // Import your HomeScreen
-import 'screens/first_screen.dart';
+import './screens/home_screen.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(QuranApp());
 }
 
-class MyApp extends StatelessWidget {
+class QuranApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Quran Karim App',
+      title: 'Quran Karim',
       theme: ThemeData(
         primarySwatch: Colors.green,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: FirstScreen(), // Set the HomeScreen as the initial screen
+      home: SurahListScreen(),
     );
   }
 }

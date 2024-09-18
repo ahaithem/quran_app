@@ -1,113 +1,93 @@
-// import 'package:flutter/material.dart';
-// import '../services/quran_service.dart';
-// import '../models/verse.dart';
-// import 'surah_detail_screen.dart';
+import 'package:flutter/material.dart';
+import 'surah_detail_screen.dart';
+import '../models/all_surahs.dart';
 
-// class HomeScreen extends StatefulWidget {
-//   @override
-//   _HomeScreenState createState() => _HomeScreenState();
-// }
+class SurahListScreen extends StatefulWidget {
+  @override
+  _SurahListScreenState createState() => _SurahListScreenState();
+}
 
-// class _HomeScreenState extends State<HomeScreen> {
-//   late Future<List<Verse>> _quranData;
-//   final QuranService _quranService = QuranService();
+class _SurahListScreenState extends State<SurahListScreen>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
 
-//   @override
-//   void initState() {
-//     super.initState();
-//     _quranData = _quranService.loadQuranData();
-//   }
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeIn,
+    );
+    _controller.forward();
+  }
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Quran Karim'),
-//         backgroundColor: Colors.green, // Custom color for AppBar
-//       ),
-//       drawer: Drawer(
-//         child: Column(
-//           children: <Widget>[
-//             Expanded(
-//               child: FutureBuilder<List<Verse>>(
-//                 future: _quranData,
-//                 builder: (context, snapshot) {
-//                   if (snapshot.connectionState == ConnectionState.waiting) {
-//                     return Center(child: CircularProgressIndicator());
-//                   } else if (snapshot.hasError) {
-//                     return Center(child: Text('Error loading Quran data'));
-//                   }
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
-//                   final List<Verse> verses = snapshot.data ?? [];
-
-//                   // Group verses by Surah number
-//                   Map<int, List<Verse>> surahMap = {};
-//                   for (var verse in verses) {
-//                     if (!surahMap.containsKey(verse.suraNo)) {
-//                       surahMap[verse.suraNo] = [];
-//                     }
-//                     surahMap[verse.suraNo]!.add(verse);
-//                   }
-
-//                   return ListView.separated(
-//                     itemCount: surahMap.keys.length,
-//                     separatorBuilder: (context, index) =>
-//                         Divider(height: 1.0, color: Colors.grey[300]),
-//                     itemBuilder: (context, index) {
-//                       final surahNo = surahMap.keys.elementAt(index);
-//                       final List<Verse> surahVerses = surahMap[surahNo]!;
-//                       final String surahNameAr = surahVerses[0]
-//                           .suraNameAr; // All verses in the same Surah have the same name
-
-//                       return ListTile(
-//                         contentPadding: EdgeInsets.symmetric(
-//                             horizontal: 16.0, vertical: 8.0),
-//                         tileColor:
-//                             Colors.grey[200], // Background color of the tile
-//                         shape: RoundedRectangleBorder(
-//                           borderRadius:
-//                               BorderRadius.circular(10.0), // Rounded corners
-//                         ),
-//                         leading: Icon(
-//                           Icons.book, // Leading icon
-//                           color: Colors.blue,
-//                         ),
-//                         title: Text(
-//                           '$surahNo سورة $surahNameAr',
-//                           style: TextStyle(
-//                             fontWeight: FontWeight.bold,
-//                             fontSize: 18.0,
-//                             color: Colors.black87, // Text color
-//                           ),
-//                         ),
-//                         onTap: () {
-//                           Navigator.pop(context); // Close the Drawer
-//                           Navigator.push(
-//                             context,
-//                             MaterialPageRoute(
-//                               builder: (context) =>
-//                                   SurahDetailScreen(verses: surahVerses),
-//                             ),
-//                           );
-//                         },
-//                       );
-//                     },
-//                   );
-//                 },
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//       body: Center(
-//         child: Text(
-//           'Select a Surah from the Drawer',
-//           style: TextStyle(
-//             fontSize: 18.0,
-//             color: Colors.black54,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    final surahNames = surahPages.keys.toList();
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Quran Karim'),
+        backgroundColor: Colors.teal,
+      ),
+      body: ListView.builder(
+        itemCount: surahPages.length,
+        itemBuilder: (context, index) {
+          String surahName = surahNames[index];
+          return FadeTransition(
+            opacity: _animation,
+            child: Card(
+              margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              elevation: 4.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: ListTile(
+                leading: Icon(
+                  Icons.book,
+                  color: Colors.teal,
+                ),
+                title: Text(
+                  surahName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18.0,
+                  ),
+                ),
+                subtitle: Text(
+                  'Starting Page: ${surahPages[surahName]}',
+                  style: TextStyle(
+                    color: Colors.grey[600],
+                  ),
+                ),
+                contentPadding:
+                    EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
+                onTap: () {
+                  int startingPage = surahPages[surahName] ?? 1;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SurahDetailScreen(
+                        startingImageIndex: startingPage,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
