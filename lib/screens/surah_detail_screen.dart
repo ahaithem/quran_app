@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import '../models/all_surahs.dart';
 
 class SurahDetailScreen extends StatefulWidget {
   final int startingImageIndex;
 
-  SurahDetailScreen({required this.startingImageIndex});
+  SurahDetailScreen({
+    required this.startingImageIndex,
+  });
 
   @override
   _SurahDetailScreenState createState() => _SurahDetailScreenState();
@@ -52,6 +55,20 @@ class _SurahDetailScreenState extends State<SurahDetailScreen>
     Navigator.popUntil(context, ModalRoute.withName('/'));
   }
 
+  String _getSurahNameForIndex(int index) {
+    for (var entry in surahPages.entries) {
+      if (index >= entry.value) {
+        if (entry.key == surahPages.keys.last ||
+            index <
+                surahPages[surahPages.keys.elementAt(
+                    surahPages.keys.toList().indexOf(entry.key) + 1)]!) {
+          return entry.key;
+        }
+      }
+    }
+    return 'Unknown Surah'; // Default case if no match is found
+  }
+
   void _toggleDrawer() {
     setState(() {
       if (_isDrawerOpen) {
@@ -80,6 +97,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen>
 
   @override
   Widget build(BuildContext context) {
+    //final surahNames = surahPages.keys.toList();
     return Scaffold(
       key: _scaffoldKey, // Assign the GlobalKey to the Scaffold
       body: Stack(
@@ -126,35 +144,56 @@ class _SurahDetailScreenState extends State<SurahDetailScreen>
           ),
           // AppBar
           if (_showAppBar)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AppBar(
-                title: Text(
-                  'Surah Images',
-                  style: TextStyle(color: Colors.white),
-                ),
-                automaticallyImplyLeading:
-                    false, // Removes the default back button
-                actions: [
-                  IconButton(
-                    onPressed: _navigateToHome,
-                    icon: Icon(Icons.home, color: Colors.white),
+            Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: AppBar(
+                    title: Text(
+                      'Surah Images',
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    automaticallyImplyLeading:
+                        false, // Removes the default back button
+                    actions: [
+                      IconButton(
+                        onPressed: _navigateToHome,
+                        icon: Icon(Icons.home, color: Colors.white),
+                      ),
+                      IconButton(
+                        onPressed: _toggleDrawer,
+                        icon: const Icon(
+                          Icons.menu,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                    backgroundColor:
+                        Colors.black.withOpacity(0.8), // Transparent background
+                    elevation: 0, // Remove shadow
                   ),
-                  IconButton(
-                    onPressed: _toggleDrawer,
-                    icon: const Icon(
-                      Icons.menu,
-                      color: Colors.white,
+                ),
+                // Add the second Positioned widget here
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 50, // Example for another positioned widget
+                    color: Colors.black.withOpacity(0.8),
+                    child: Center(
+                      child: Text(
+                        _getSurahNameForIndex(_currentImageIndex),
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
-                ],
-                backgroundColor:
-                    Colors.black.withOpacity(0.8), // Transparent background
-                elevation: 0, // Remove shadow
-              ),
+                ),
+              ],
             ),
+
           // Drawer
           SlideTransition(
             position: _offsetAnimation,
@@ -182,7 +221,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen>
                           },
                         ),
                         _buildDrawerItem(
-                          icon: Icons.favorite,
+                          icon: Icons.save,
                           text: 'البند الثاني', // "Item 2" in Arabic
                           onTap: () {
                             // Handle item 2 tap

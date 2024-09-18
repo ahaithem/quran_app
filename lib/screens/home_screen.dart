@@ -35,6 +35,7 @@ class _SurahListScreenState extends State<SurahListScreen>
   @override
   Widget build(BuildContext context) {
     final surahNames = surahPages.keys.toList();
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Quran Karim'),
