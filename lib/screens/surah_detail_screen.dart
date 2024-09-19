@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/all_surahs.dart';
+import '../models/all_ahzab.dart' as all_ahzab;
 
 class SurahDetailScreen extends StatefulWidget {
   final int startingImageIndex;
@@ -152,7 +153,7 @@ class _SurahDetailScreenState extends State<SurahDetailScreen>
                   right: 0,
                   child: AppBar(
                     title: Text(
-                      'Surah Images',
+                      'القائمة الرئيسية',
                       style: TextStyle(color: Colors.white),
                     ),
                     automaticallyImplyLeading:
@@ -183,18 +184,23 @@ class _SurahDetailScreenState extends State<SurahDetailScreen>
                   child: Container(
                     height: 50, // Example for another positioned widget
                     color: Colors.black.withOpacity(0.8),
-                    child: Center(
-                      child: Text(
-                        _getSurahNameForIndex(_currentImageIndex),
-                        style: TextStyle(color: Colors.white),
-                      ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Text(
+                          _getSurahNameForIndex(_currentImageIndex),
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        Text(
+                          'الحزب ${all_ahzab.getHizbNumberForIndex(_currentImageIndex)}',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ],
             ),
-
-          // Drawer
           SlideTransition(
             position: _offsetAnimation,
             child: Align(
