@@ -1,9 +1,16 @@
 // import 'package:flutter/material.dart';
+// import '../models/all_surahs.dart';
+// import '../models/all_ahzab.dart' as all_ahzab;
+// import './last_page.dart';
+// import '../providers/theme_provider.dart';
+// import 'package:provider/provider.dart';
 
 // class SurahDetailScreen extends StatefulWidget {
 //   final int startingImageIndex;
 
-//   SurahDetailScreen({required this.startingImageIndex});
+//   SurahDetailScreen({
+//     required this.startingImageIndex,
+//   });
 
 //   @override
 //   _SurahDetailScreenState createState() => _SurahDetailScreenState();
@@ -12,17 +19,18 @@
 // class _SurahDetailScreenState extends State<SurahDetailScreen>
 //     with SingleTickerProviderStateMixin {
 //   int _currentImageIndex = 0;
-//   final GlobalKey<ScaffoldState> _scaffoldKey =
-//       GlobalKey<ScaffoldState>(); // Create a GlobalKey
-//   bool _isDrawerOpen = false; // Track drawer state
+//   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+//   bool _isDrawerOpen = false;
 //   late AnimationController _controller;
 //   late Animation<Offset> _offsetAnimation;
-//   bool _showAppBar = false; // Track whether to show the AppBar
+//   bool _showAppBar = false;
+//   // Track the marked image index
+//   int? _markedImageIndex;
 
 //   @override
 //   void initState() {
 //     super.initState();
-//     _currentImageIndex = widget.startingImageIndex; // Set the initial image
+//     _currentImageIndex = widget.startingImageIndex;
 
 //     _controller = AnimationController(
 //       vsync: this,
@@ -40,16 +48,50 @@
 //     super.dispose();
 //   }
 
-//   // Total number of images (from 1 to 604)
 //   final int totalImages = 604;
 
-//   // Method to get the image path by index
 //   String getImagePath(int index) {
-//     return 'assets/images/${index}.png'; // Assuming your images are in assets/images/
+//     return 'assets/images/${index}.png';
 //   }
 
 //   void _navigateToHome() {
 //     Navigator.popUntil(context, ModalRoute.withName('/'));
+//   }
+
+//   String _getSurahNameForIndex(int index) {
+//     for (var entry in surahPages.entries) {
+//       if (index >= entry.value) {
+//         if (entry.key == surahPages.keys.last ||
+//             index <
+//                 surahPages[surahPages.keys.elementAt(
+//                     surahPages.keys.toList().indexOf(entry.key) + 1)]!) {
+//           return entry.key;
+//         }
+//       }
+//     }
+//     return 'Unknown Surah';
+//   }
+
+//   // Method to mark the current image
+//   void _putTheMark() {
+//     setState(() {
+//       _markedImageIndex =
+//           _currentImageIndex; // Set the mark for the current image
+//     });
+//   }
+
+//   void _moveToTheMark() {
+//     setState(() {
+//       if (_markedImageIndex != null) {
+//         _currentImageIndex =
+//             _markedImageIndex!; // Move to the marked image index
+//       } else {
+//         // Optionally show a message if no mark is set
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text('No mark has been set.')),
+//         );
+//       }
+//     });
 //   }
 
 //   void _toggleDrawer() {
@@ -80,26 +122,24 @@
 
 //   @override
 //   Widget build(BuildContext context) {
+//     final themeProvider = Provider.of<ThemeProvider>(context);
 //     return Scaffold(
-//       key: _scaffoldKey, // Assign the GlobalKey to the Scaffold
+//       key: _scaffoldKey,
 //       body: Stack(
 //         children: [
-//           // Image Background
 //           GestureDetector(
 //             onTap: () {
-//               _toggleAppBar(); // Toggle the AppBar visibility
-//               _closeDrawer(); // Close the drawer when tapping on the image
+//               _toggleAppBar();
+//               _closeDrawer();
 //             },
 //             onHorizontalDragEnd: (details) {
 //               if (details.primaryVelocity != null) {
 //                 setState(() {
 //                   if (details.primaryVelocity! > 0) {
-//                     // Swiping right (left-to-right) -> Go to next image
 //                     if (_currentImageIndex < totalImages) {
 //                       _currentImageIndex++;
 //                     }
 //                   } else if (details.primaryVelocity! < 0) {
-//                     // Swiping left (right-to-left) -> Go to previous image
 //                     if (_currentImageIndex > 1) {
 //                       _currentImageIndex--;
 //                     }
@@ -113,49 +153,85 @@
 //                 transitionBuilder: (Widget child, Animation<double> animation) {
 //                   return FadeTransition(opacity: animation, child: child);
 //                 },
-//                 child: Image.asset(
-//                   getImagePath(_currentImageIndex),
-//                   key: ValueKey<int>(
-//                       _currentImageIndex), // Key to track the current image
-//                   fit: BoxFit.fill, // Make the image cover the entire screen
-//                   width: double.infinity,
-//                   height: double.infinity,
+//                 child: ColorFiltered(
+//                   colorFilter: ColorFilter.mode(
+//                     themeProvider.isDarkMode
+//                         ? Colors.black.withOpacity(0.5)
+//                         : Colors.transparent,
+//                     BlendMode.darken,
+//                   ),
+//                   child: Image.asset(
+//                     getImagePath(_currentImageIndex),
+//                     key: ValueKey<int>(_currentImageIndex),
+//                     fit: BoxFit.fill,
+//                     width: double.infinity,
+//                     height: double.infinity,
+//                   ),
 //                 ),
 //               ),
 //             ),
 //           ),
-//           // AppBar
+//           // AppBar and other widgets remain unchanged
 //           if (_showAppBar)
-//             Positioned(
-//               top: 0,
-//               left: 0,
-//               right: 0,
-//               child: AppBar(
-//                 title: Text(
-//                   'Surah Images',
-//                   style: TextStyle(color: Colors.white),
-//                 ),
-//                 automaticallyImplyLeading:
-//                     false, // Removes the default back button
-//                 actions: [
-//                   IconButton(
-//                     onPressed: _navigateToHome,
-//                     icon: Icon(Icons.home, color: Colors.white),
+//             Stack(
+//               children: [
+//                 Positioned(
+//                   top: 0,
+//                   left: 0,
+//                   right: 0,
+//                   child: AppBar(
+//                     title: Text(
+//                       'القائمة الرئيسية',
+//                       style: TextStyle(color: Colors.white),
+//                     ),
+//                     automaticallyImplyLeading: false,
+//                     actions: [
+//                       IconButton(
+//                         onPressed: _navigateToHome,
+//                         icon: Icon(Icons.home, color: Colors.white),
+//                       ),
+//                       IconButton(
+//                         onPressed: _toggleDrawer,
+//                         icon: const Icon(
+//                           Icons.menu,
+//                           color: Colors.white,
+//                         ),
+//                       ),
+//                       // Display the checkmark if the current image is marked
+//                       if (_markedImageIndex == _currentImageIndex)
+//                         Icon(
+//                           Icons.check,
+//                           color: Colors.white,
+//                         ),
+//                     ],
+//                     backgroundColor: Colors.black.withOpacity(0.8),
+//                     elevation: 0,
 //                   ),
-//                   IconButton(
-//                     onPressed: _toggleDrawer,
-//                     icon: const Icon(
-//                       Icons.menu,
-//                       color: Colors.white,
+//                 ),
+//                 Positioned(
+//                   bottom: 0,
+//                   left: 0,
+//                   right: 0,
+//                   child: Container(
+//                     height: 50,
+//                     color: Colors.black.withOpacity(0.8),
+//                     child: Row(
+//                       mainAxisAlignment: MainAxisAlignment.spaceAround,
+//                       children: [
+//                         Text(
+//                           _getSurahNameForIndex(_currentImageIndex),
+//                           style: TextStyle(color: Colors.white),
+//                         ),
+//                         Text(
+//                           'الحزب ${all_ahzab.getHizbNumberForIndex(_currentImageIndex)}',
+//                           style: TextStyle(color: Colors.white),
+//                         ),
+//                       ],
 //                     ),
 //                   ),
-//                 ],
-//                 backgroundColor:
-//                     Colors.black.withOpacity(0.8), // Transparent background
-//                 elevation: 0, // Remove shadow
-//               ),
+//                 ),
+//               ],
 //             ),
-//           // Drawer
 //           SlideTransition(
 //             position: _offsetAnimation,
 //             child: Align(
@@ -165,30 +241,56 @@
 //                 child: ClipRRect(
 //                   borderRadius: BorderRadius.all(Radius.circular(30)),
 //                   child: Container(
-//                     width: MediaQuery.of(context).size.width *
-//                         0.7, // Custom width (70% of screen width)
-//                     height: MediaQuery.of(context).size.height *
-//                         0.7, // Custom height (70% of screen height)
-//                     color: Colors.black
-//                         .withOpacity(0.8), // Transparent black background
+//                     width: MediaQuery.of(context).size.width * 0.7,
+//                     height: MediaQuery.of(context).size.height * 0.7,
+//                     color: Colors.black.withOpacity(0.8),
 //                     child: ListView(
 //                       padding: EdgeInsets.zero,
 //                       children: [
 //                         _buildDrawerItem(
-//                           icon: Icons.book,
-//                           text: 'البند الأول', // "Item 1" in Arabic
+//                           imagePath: 'assets/images/favori.png',
+//                           text: 'فضل قراءة الفران',
+//                           onTap: () {},
+//                         ),
+//                         _buildDrawerItem(
+//                           imagePath: 'assets/images/menu.png',
+//                           text: 'الفهرس',
+//                           onTap: _navigateToHome,
+//                         ),
+//                         _buildDrawerItem(
+//                           imagePath: 'assets/images/save_icon.png',
+//                           text: 'put the mark',
+//                           onTap: _putTheMark, // Call _putTheMark when tapped
+//                         ),
+//                         _buildDrawerItem(
+//                           imagePath: 'assets/images/save_icon.png',
+//                           text: 'move to the mark',
+//                           onTap: _moveToTheMark,
+//                         ),
+//                         _buildDrawerItem(
+//                           imagePath: 'assets/images/khetm_icon.png',
+//                           text: 'دعاء الختم',
 //                           onTap: () {
-//                             // Handle item 1 tap
+//                             Navigator.push(
+//                               context,
+//                               MaterialPageRoute(
+//                                   builder: (context) => LastPage()),
+//                             );
 //                           },
 //                         ),
 //                         _buildDrawerItem(
-//                           icon: Icons.favorite,
-//                           text: 'البند الثاني', // "Item 2" in Arabic
-//                           onTap: () {
-//                             // Handle item 2 tap
-//                           },
+//                           imagePath: 'assets/images/ampoule.png',
+//                           text: 'سطوع الشاشة',
+//                           onTap: () {},
 //                         ),
-//                         // Add more items as needed
+//                         _buildDrawerItem(
+//                           imagePath: 'assets/images/mode-nuit.png',
+//                           text: 'dark mode',
+//                           onTap: () {
+//                             Provider.of<ThemeProvider>(context, listen: false)
+//                                 .toggleTheme();
+//                           },
+//                         )
 //                       ],
 //                     ),
 //                   ),
@@ -201,29 +303,43 @@
 //     );
 //   }
 
-//   // Helper method to build a custom drawer item
-//   Widget _buildDrawerItem(
-//       {required IconData icon,
-//       required String text,
-//       required GestureTapCallback onTap}) {
+//   Widget _buildDrawerItem({
+//     required String imagePath,
+//     required String text,
+//     required GestureTapCallback onTap,
+//   }) {
 //     return Column(
 //       children: [
 //         ListTile(
-//           leading: Icon(icon, color: Colors.white),
-//           title: Text(
-//             text,
-//             style: TextStyle(
-//                 color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-//             textAlign: TextAlign.right, // Align text to the right
+//           title: Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Expanded(
+//                 child: Text(
+//                   text,
+//                   style: const TextStyle(
+//                       color: Colors.white,
+//                       fontSize: 22,
+//                       fontWeight: FontWeight.bold),
+//                   textAlign: TextAlign.left,
+//                 ),
+//               ),
+//               Image.asset(
+//                 imagePath,
+//                 width: 24,
+//                 height: 24,
+//                 color: Colors.white,
+//               ),
+//             ],
 //           ),
 //           onTap: onTap,
-//           tileColor: Colors.black.withOpacity(0.2), // Tile background
+//           tileColor: Colors.black.withOpacity(0.2),
 //           shape: RoundedRectangleBorder(
 //             borderRadius: BorderRadius.circular(8.0),
-//             side: BorderSide(color: Colors.white.withOpacity(0.4)), // Border
+//             side: BorderSide(color: Colors.white.withOpacity(0.4)),
 //           ),
 //         ),
-//         Divider(color: Colors.white.withOpacity(0.3)), // Divider between items
+//         Divider(color: Colors.white.withOpacity(0.3)),
 //       ],
 //     );
 //   }
